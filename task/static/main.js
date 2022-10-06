@@ -1,7 +1,8 @@
 const App = {
     data() {
         return {
-            tasks: ['test'],
+            task: {title: ''},
+            tasks: [],
         }
     },
     /* 通常、Vue は{{}}を使って、データを表示するのですが
@@ -28,7 +29,35 @@ const App = {
                 console.error('There has been a problem with your fetch operation:', error);
             });
         },
+        createTask(){
+            // csrfトークンを定義
+            const csrftoken = Cookies.get('csrftoken');
+            // taskリストを取得する
+            this.getTasks();
+            fetch(URL, {
+                method: 'post',
+                headers: {
+                    'Content-Type':  'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+                // htmlから入力されたtaskの情報をviews.pyに送信
+                body:JSON.stringify(this.task),
+            })
+            .then((response) => {
+                return response.json();
+            })
+            .then((task) => {
+                console.log(task)
+                // タイトルを空にする
+                this.task.title = ''
+                this.getTasks();
+            })
+            .catch(error => {
+                console.error('There has been a problem with your fetch operation:', error);
+            });
+        },
     },
+    
     //created()には Vue のオブジェクトが起動したときに実行される処理を書きます。
     created() {
         this.getTasks();
